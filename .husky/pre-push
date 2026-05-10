@@ -1,18 +1,12 @@
-if [ ! -f .env ]; then
-  echo "✗ .env file not found. Docker build requires environment variables."
-  exit 1
-fi
+#!/usr/bin/env sh
+[ ! -f .env ] && echo "✗ .env file not found" && exit 1
+
+. ./.env
 
 echo "Building Docker image to validate..."
 
-source .env
 docker build -t rent-management-system:latest . \
   --build-arg "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
-  --quiet
+  --quiet || { echo "✗ Docker build failed. Ensure Docker is running."; exit 1; }
 
-if [ $? -eq 0 ]; then
-  echo "✓ Docker image built successfully."
-else
-  echo "✗ Docker build failed. Fix errors before pushing."
-  exit 1
-fi
+echo "✓ Docker image built successfully."
