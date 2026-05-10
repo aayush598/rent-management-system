@@ -1,0 +1,25 @@
+if [ ! -f .env ]; then
+  echo "✗ .env file not found. Docker build requires environment variables."
+  exit 1
+fi
+
+echo "Building Docker image to validate..."
+
+BUILD_ARGS=""
+while IFS='=' read -r key rest; do
+  [ -z "$key" ] && continue
+  case "$key" in
+    '#'*) continue ;;
+    '') continue ;;
+    *) BUILD_ARGS="$BUILD_ARGS --build-arg $key=$rest" ;;
+  esac
+done < .env
+
+docker build -t rent-management-system:latest . $BUILD_ARGS --quiet
+
+if [ $? -eq 0 ]; then
+  echo "✓ Docker image built successfully."
+else
+  echo "✗ Docker build failed. Fix errors before pushing."
+  exit 1
+fi
