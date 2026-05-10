@@ -10,10 +10,10 @@ export default async function DashboardPage() {
   if (!userId) return null;
 
   const userTenants = await db.select().from(tenants).where(eq(tenants.userId, userId));
-  
+
   // Quick stats
   const totalTenants = userTenants.length;
-  
+
   return (
     <div className="space-y-6">
       <div>
@@ -58,7 +58,9 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-200 flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-900">Your Tenants</h2>
-            <Link href="/dashboard/tenants" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">View All</Link>
+            <Link href="/dashboard/tenants" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+              View All
+            </Link>
           </div>
           <div className="divide-y divide-slate-100">
             {userTenants.length === 0 ? (
@@ -66,8 +68,11 @@ export default async function DashboardPage() {
                 No tenants found. Add your first tenant to get started.
               </div>
             ) : (
-              userTenants.map(tenant => (
-                <div key={tenant.id} className="p-4 md:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+              userTenants.map((tenant) => (
+                <div
+                  key={tenant.id}
+                  className="p-4 md:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 transition-colors"
+                >
                   <div>
                     <h3 className="font-semibold text-slate-900">{tenant.name}</h3>
                     <p className="text-sm text-slate-500">Family of {tenant.familySize}</p>
@@ -77,7 +82,10 @@ export default async function DashboardPage() {
                       <p className="text-sm text-slate-500">Base Rent</p>
                       <p className="font-semibold text-slate-900">₹{tenant.baseRent}</p>
                     </div>
-                    <Link href={`/dashboard/tenants/${tenant.id}`} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg text-sm transition-colors">
+                    <Link
+                      href={`/dashboard/tenants/${tenant.id}`}
+                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg text-sm transition-colors"
+                    >
                       Manage
                     </Link>
                   </div>

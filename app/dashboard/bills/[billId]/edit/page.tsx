@@ -24,7 +24,10 @@ export default async function EditBillPage({ params }: { params: Promise<{ billI
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4">
-        <Link href={`/dashboard/tenants/${tenant.id}`} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+        <Link
+          href={`/dashboard/tenants/${tenant.id}`}
+          className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+        >
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </Link>
         <div>

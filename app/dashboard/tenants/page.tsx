@@ -32,10 +32,16 @@ export default async function TenantsPage() {
             </div>
           ) : (
             userTenants.map((tenant) => (
-              <Link key={tenant.id} href={`/dashboard/tenants/${tenant.id}`} className="block bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group">
+              <Link
+                key={tenant.id}
+                href={`/dashboard/tenants/${tenant.id}`}
+                className="block bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group"
+              >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{tenant.name}</h2>
+                    <h2 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      {tenant.name}
+                    </h2>
                     <p className="text-slate-500 mt-1">Family of {tenant.familySize}</p>
                   </div>
                   <div className="text-right">
@@ -61,25 +67,70 @@ export default async function TenantsPage() {
               </div>
               <h2 className="text-lg font-bold text-slate-900">Add New Tenant</h2>
             </div>
-            
+
             <form action={createTenant} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">Tenant Name</label>
-                <input required type="text" id="name" name="name" className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="e.g. John Doe" />
+                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
+                  Tenant Name
+                </label>
+                <input
+                  required
+                  type="text"
+                  id="name"
+                  name="name"
+                  className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  placeholder="e.g. John Doe"
+                />
               </div>
               <div>
-                <label htmlFor="familySize" className="block text-sm font-medium text-slate-700 mb-1">Family Members</label>
-                <input required type="number" min="1" id="familySize" name="familySize" className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="e.g. 4" />
+                <label htmlFor="familySize" className="block text-sm font-medium text-slate-700 mb-1">
+                  Family Members
+                </label>
+                <input
+                  required
+                  type="number"
+                  min="1"
+                  id="familySize"
+                  name="familySize"
+                  className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  placeholder="e.g. 4"
+                />
               </div>
               <div>
-                <label htmlFor="baseRent" className="block text-sm font-medium text-slate-700 mb-1">Base Rent (₹)</label>
-                <input required type="number" min="0" step="0.01" id="baseRent" name="baseRent" className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="e.g. 15000" />
+                <label htmlFor="baseRent" className="block text-sm font-medium text-slate-700 mb-1">
+                  Base Rent (₹)
+                </label>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  id="baseRent"
+                  name="baseRent"
+                  className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  placeholder="e.g. 15000"
+                />
               </div>
               <div>
-                <label htmlFor="waterCharge" className="block text-sm font-medium text-slate-700 mb-1">Fixed Water Charge (₹)</label>
-                <input required type="number" min="0" step="0.01" id="waterCharge" name="waterCharge" className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="e.g. 500" defaultValue="0" />
+                <label htmlFor="waterCharge" className="block text-sm font-medium text-slate-700 mb-1">
+                  Fixed Water Charge (₹)
+                </label>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  id="waterCharge"
+                  name="waterCharge"
+                  className="w-full px-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  placeholder="e.g. 500"
+                  defaultValue="0"
+                />
               </div>
-              <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition-colors mt-2">
+              <button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition-colors mt-2"
+              >
                 Save Tenant
               </button>
             </form>

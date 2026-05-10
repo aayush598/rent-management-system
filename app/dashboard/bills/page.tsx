@@ -12,16 +12,14 @@ export default async function BillsPage() {
   if (!userId) return null;
 
   const userTenants = await db.select().from(tenants).where(eq(tenants.userId, userId));
-  const tenantIds = userTenants.map(t => t.id);
+  const tenantIds = userTenants.map((t) => t.id);
 
   let allBills: any[] = [];
   if (tenantIds.length > 0) {
-    allBills = await db.select().from(bills)
-      .where(inArray(bills.tenantId, tenantIds))
-      .orderBy(desc(bills.createdAt));
+    allBills = await db.select().from(bills).where(inArray(bills.tenantId, tenantIds)).orderBy(desc(bills.createdAt));
   }
 
-  const tenantMap = new Map(userTenants.map(t => [t.id, t.name]));
+  const tenantMap = new Map(userTenants.map((t) => [t.id, t.name]));
 
   return (
     <div className="space-y-6">
@@ -34,14 +32,14 @@ export default async function BillsPage() {
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <div className="relative w-64">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search bills..." 
+            <input
+              type="text"
+              placeholder="Search bills..."
               className="w-full pl-10 pr-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 text-slate-500 font-medium text-sm">
@@ -62,20 +60,42 @@ export default async function BillsPage() {
                   </td>
                 </tr>
               ) : (
-                allBills.map(bill => (
+                allBills.map((bill) => (
                   <tr key={bill.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 text-slate-600 font-medium">#{bill.id}</td>
                     <td className="px-6 py-4 font-semibold text-slate-900">{tenantMap.get(bill.tenantId)}</td>
                     <td className="px-6 py-4 text-slate-600">{bill.month}</td>
-                    <td className="px-6 py-4 text-slate-600">{bill.createdAt ? format(new Date(bill.createdAt), "MMM d, yyyy") : "N/A"}</td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {bill.createdAt ? format(new Date(bill.createdAt), "MMM d, yyyy") : "N/A"}
+                    </td>
                     <td className="px-6 py-4 text-right font-semibold text-slate-900">₹{bill.totalAmount}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Link href={`/receipt/${bill.id}`} target="_blank" className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                        <Link
+                          href={`/receipt/${bill.id}`}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
                           <FileText className="w-4 h-4" /> Receipt
                         </Link>
-                        <Link href={`/dashboard/bills/${bill.id}/edit`} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Bill">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                        <Link
+                          href={`/dashboard/bills/${bill.id}/edit`}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="Edit Bill"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                          </svg>
                         </Link>
                         <DeleteBillButton billId={bill.id} tenantId={bill.tenantId} />
                       </div>
