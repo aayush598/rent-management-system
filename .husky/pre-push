@@ -5,17 +5,10 @@ fi
 
 echo "Building Docker image to validate..."
 
-BUILD_ARGS=""
-while IFS='=' read -r key rest; do
-  [ -z "$key" ] && continue
-  case "$key" in
-    '#'*) continue ;;
-    '') continue ;;
-    *) BUILD_ARGS="$BUILD_ARGS --build-arg $key=$rest" ;;
-  esac
-done < .env
-
-docker build -t rent-management-system:latest . $BUILD_ARGS --quiet
+source .env
+docker build -t rent-management-system:latest . \
+  --build-arg "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
+  --quiet
 
 if [ $? -eq 0 ]; then
   echo "✓ Docker image built successfully."
