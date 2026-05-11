@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { tenants, bills, payments } from "@/db/schema";
 import { eq, inArray, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { FileText, Home, Zap, Droplets, IndianRupee, CheckCircle, Clock } from "lucide-react";
+import { FileText, Home, Zap, Droplets, IndianRupee, CheckCircle, Clock, Receipt } from "lucide-react";
 
 export default async function MyPage() {
   const { userId } = await auth();
@@ -144,6 +144,15 @@ export default async function MyPage() {
                         Electricity: ₹{bill.electricityAmount} ({bill.electricityCurrUnit} - {bill.electricityPrevUnit}{" "}
                         units)
                       </p>
+                      {(() => {
+                        const cc = (bill.customCharges || []) as { name: string; amount: number; paid: number }[];
+                        return cc.map((c, i) => (
+                          <p key={i} className="flex items-center gap-2">
+                            <Receipt className="w-4 h-4 text-purple-500" />
+                            {c.name}: ₹{c.amount}
+                          </p>
+                        ));
+                      })()}
                     </div>
                   </div>
                   <div className="text-right flex flex-col justify-between sm:items-end">

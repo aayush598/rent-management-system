@@ -56,7 +56,7 @@ export default async function BillsPage() {
               {allBills.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
-                    No bills generated yet. Go to a tenant's page to generate one.
+                    No bills generated yet. Go to a tenant&apos;s page to generate one.
                   </td>
                 </tr>
               ) : (

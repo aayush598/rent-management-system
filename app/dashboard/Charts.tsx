@@ -11,7 +11,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
   Line,
   AreaChart,
   Area,
@@ -58,9 +57,10 @@ const COLORS = {
   emerald: "#10b981",
   amber: "#f59e0b",
   red: "#ef4444",
+  purple: "#8b5cf6",
 };
 
-export function DashboardCharts({ bills, tenantCount }: { bills: any[]; tenantCount: number }) {
+export function DashboardCharts({ bills }: { bills: any[]; _tenantCount?: number }) {
   const monthlyData = groupByMonth(bills);
 
   const paidCount = bills.filter((b) => b.isPaid === true).length;
@@ -92,11 +92,17 @@ export function DashboardCharts({ bills, tenantCount }: { bills: any[]; tenantCo
     const rent = bills.reduce((sum, b) => sum + (Number(b.rentAmount) || 0), 0);
     const water = bills.reduce((sum, b) => sum + (Number(b.waterAmount) || 0), 0);
     const electricity = bills.reduce((sum, b) => sum + (Number(b.electricityAmount) || 0), 0);
-    return [
+    const custom = bills.reduce((sum, b) => {
+      const cc = b.customCharges || [];
+      return sum + (Array.isArray(cc) ? cc.reduce((s: number, c: any) => s + (Number(c.amount) || 0), 0) : 0);
+    }, 0);
+    const result = [
       { name: "Rent", amount: rent, color: COLORS.indigo },
       { name: "Water", amount: water, color: COLORS.emerald },
       { name: "Electricity", amount: electricity, color: COLORS.amber },
     ];
+    if (custom > 0) result.push({ name: "Custom", amount: custom, color: COLORS.purple });
+    return result;
   })();
 
   const topTenantsData = (() => {
@@ -115,11 +121,6 @@ export function DashboardCharts({ bills, tenantCount }: { bills: any[]; tenantCo
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-slate-500">Analytics and insights for your rental properties.</p>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Revenue Bar Chart */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -256,98 +257,6 @@ export function DashboardCharts({ bills, tenantCount }: { bills: any[]; tenantCo
             </AreaChart>
           </ResponsiveContainer>
         )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue by Category */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">Revenue Breakdown</h3>
-          {categoryData.every((d) => d.amount === 0) ? (
-            <p className="text-slate-400 text-sm py-8 text-center">No revenue data yet.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={categoryData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis
-                  type="number"
-                  tick={{ fontSize: 12, fill: "#64748b" }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: 13, fill: "#334155" }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={90}
-                />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload || payload.length === 0) return null;
-                    const val = typeof payload[0].value === "number" ? payload[0].value : 0;
-                    return (
-                      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-lg text-sm">
-                        <p className="font-semibold text-slate-900 mb-1">{label}</p>
-                        <p className="font-medium" style={{ color: payload[0].color }}>
-                          {formatCurrency(val)}
-                        </p>
-                      </div>
-                    );
-                  }}
-                />
-                <Bar dataKey="amount" name="Amount" radius={[0, 4, 4, 0]}>
-                  {categoryData.map((entry, idx) => (
-                    <Cell key={idx} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* Top Tenants by Total Due */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">Top Tenants by Total Due</h3>
-          {topTenantsData.length === 0 ? (
-            <p className="text-slate-400 text-sm py-8 text-center">No tenant data yet.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topTenantsData} layout="vertical" margin={{ left: 10, right: 40, top: 5, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis
-                  type="number"
-                  tick={{ fontSize: 12, fill: "#64748b" }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: 12, fill: "#334155" }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={100}
-                />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload || payload.length === 0) return null;
-                    const val = typeof payload[0].value === "number" ? payload[0].value : 0;
-                    return (
-                      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-lg text-sm">
-                        <p className="font-semibold text-slate-900 mb-1">{label}</p>
-                        <p className="font-medium text-indigo-600">Total Due: {formatCurrency(val)}</p>
-                      </div>
-                    );
-                  }}
-                />
-                <Bar dataKey="total" name="Total Due" fill={COLORS.indigo} radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
       </div>
     </div>
   );

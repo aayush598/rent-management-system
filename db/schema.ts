@@ -1,13 +1,18 @@
-import { pgTable, serial, text, integer, timestamp, boolean, decimal } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, boolean, decimal, jsonb } from "drizzle-orm/pg-core";
 
 export const tenants = pgTable("tenants", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull(), // Clerk User ID (Landlord)
   tenantUserId: text("tenant_user_id"), // Clerk User ID (Tenant) for RBAC
   name: text("name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
   familySize: integer("family_size").notNull(),
   baseRent: decimal("base_rent", { precision: 10, scale: 2 }).notNull().default("0"),
   waterCharge: decimal("water_charge", { precision: 10, scale: 2 }).notNull().default("0"),
+  customCharges: jsonb("custom_charges").$type<{ name: string; amount: number }[]>().default([]),
+  isLandlordConfirmed: boolean("is_landlord_confirmed").default(true),
+  isTenantConfirmed: boolean("is_tenant_confirmed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -20,7 +25,7 @@ export const bills = pgTable("bills", {
   // Duration
   dateStart: text("date_start"),
   dateEnd: text("date_end"),
-  month: text("month"), // keep for backwards compatibility or display
+  month: text("month"),
 
   // Due Amounts
   rentAmount: decimal("rent_amount", { precision: 10, scale: 2 }).notNull().default("0"),
@@ -29,6 +34,7 @@ export const bills = pgTable("bills", {
   electricityPrevUnit: integer("electricity_prev_unit").notNull().default(0),
   electricityCurrUnit: integer("electricity_curr_unit").notNull().default(0),
   electricityAmount: decimal("electricity_amount", { precision: 10, scale: 2 }).notNull().default("0"),
+  customCharges: jsonb("custom_charges").$type<{ name: string; amount: number; paid: number }[]>().default([]),
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull().default("0"),
 
   // Paid Amounts

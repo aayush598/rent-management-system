@@ -1,0 +1,242 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import {
+  Printer,
+  Download,
+  Image as ImageIcon,
+  FileText,
+  Share2,
+  Loader2,
+  Check,
+  Mail,
+  MessageCircle,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { toPng, toCanvas, toBlob } from "html-to-image";
+
+interface ReceiptActionsProps {
+  receiptElementId?: string;
+  shareText?: string;
+}
+
+export function ReceiptActions({
+  receiptElementId = "receipt-content",
+  shareText = "Check out my RentMaster receipt!",
+}: ReceiptActionsProps) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handlePrint = () => window.print();
+
+  const handleDownloadPdf = useCallback(async () => {
+    const el = document.getElementById(receiptElementId);
+    if (!el) {
+      toast.error("Receipt content not found");
+      return;
+    }
+
+    setBusy("pdf");
+    try {
+      const { default: jsPDF } = await import("jspdf");
+
+      // We use html-to-image to get a canvas which handles modern CSS much better
+      const canvas = await toCanvas(el, {
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        style: {
+          transform: "scale(1)",
+        },
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`receipt-${Date.now()}.pdf`);
+
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Failed to export PDF. Please try again.");
+    } finally {
+      setBusy(null);
+    }
+  }, [receiptElementId]);
+
+  const handleDownloadImage = useCallback(async () => {
+    const el = document.getElementById(receiptElementId);
+    if (!el) {
+      toast.error("Receipt content not found");
+      return;
+    }
+
+    setBusy("image");
+    try {
+      const dataUrl = await toPng(el, {
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+      });
+
+      const link = document.createElement("a");
+      link.download = `receipt-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+
+      toast.success("Image exported successfully");
+    } catch (error) {
+      console.error("Image export error:", error);
+      toast.error("Failed to export image.");
+    } finally {
+      setBusy(null);
+    }
+  }, [receiptElementId]);
+
+  const handleDownloadText = useCallback(() => {
+    const el = document.getElementById(receiptElementId);
+    if (!el) return;
+    const blob = new Blob([el.textContent || ""], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `receipt-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+    toast.success("Text downloaded");
+  }, [receiptElementId]);
+
+  const shareViaPdf = useCallback(
+    async (popup: Window | null, shareUrl: string, label: string) => {
+      const el = document.getElementById(receiptElementId);
+      if (!el) {
+        if (popup) popup.location.href = shareUrl;
+        return;
+      }
+      try {
+        const { default: jsPDF } = await import("jspdf");
+        const canvas = await toCanvas(el, {
+          pixelRatio: 2,
+          backgroundColor: "#ffffff",
+        });
+
+        const imgData = canvas.toDataURL("image/jpeg", 1.0);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pw = pdf.internal.pageSize.getWidth();
+        const ph = (canvas.height * pw) / canvas.width;
+        pdf.addImage(imgData, "JPEG", 0, 0, pw, ph);
+
+        const blob = pdf.output("blob");
+        const file = new File([blob], `receipt-${Date.now()}.pdf`, { type: "application/pdf" });
+
+        if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+          popup?.close();
+          await navigator.share({ title: "Rent Receipt", text: shareText, files: [file] });
+          toast.success(`Shared via ${label}`);
+          return;
+        }
+      } catch (error) {
+        console.error("Share error:", error);
+      }
+
+      if (popup) popup.location.href = shareUrl;
+      else window.open(shareUrl, "_blank");
+      toast.success(`${label} opened`);
+    },
+    [receiptElementId, shareText],
+  );
+
+  const handleShareGmail = useCallback(async () => {
+    setBusy("gmail");
+    const subject = encodeURIComponent("Rent Receipt from RentMaster");
+    const body = encodeURIComponent(`${shareText}\n\nView online: ${window.location.href}\n\nGenerated by RentMaster`);
+    const mailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+    const popup = window.open("", "_blank");
+    try {
+      await shareViaPdf(popup, mailUrl, "Gmail");
+    } catch {
+      if (popup) popup.location.href = mailUrl;
+      else window.open(mailUrl, "_blank");
+    } finally {
+      setBusy(null);
+    }
+  }, [shareViaPdf]);
+
+  const handleShareWhatsApp = useCallback(async () => {
+    setBusy("whatsapp");
+    const text = encodeURIComponent(`${shareText}\n${window.location.href}`);
+    const waUrl = `https://wa.me/?text=${text}`;
+    const popup = window.open("", "_blank");
+    try {
+      await shareViaPdf(popup, waUrl, "WhatsApp");
+    } catch {
+      if (popup) popup.location.href = waUrl;
+      else window.open(waUrl, "_blank");
+    } finally {
+      setBusy(null);
+    }
+  }, [shareViaPdf]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      toast.success("Link copied");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 print:hidden">
+      <Button onClick={handlePrint} variant="outline" size="sm">
+        <Printer className="w-4 h-4" /> Print
+      </Button>
+      <Button onClick={handleDownloadPdf} variant="outline" size="sm" disabled={!!busy}>
+        {busy === "pdf" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+        PDF
+      </Button>
+      <Button onClick={handleDownloadImage} variant="outline" size="sm" disabled={!!busy}>
+        {busy === "image" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+        Image
+      </Button>
+      <Button onClick={handleDownloadText} variant="outline" size="sm" disabled={!!busy}>
+        <FileText className="w-4 h-4" /> TXT
+      </Button>
+      <Button
+        onClick={handleShareWhatsApp}
+        variant="outline"
+        size="sm"
+        disabled={!!busy}
+        className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+      >
+        {busy === "whatsapp" ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+        WhatsApp
+      </Button>
+      <Button
+        onClick={handleShareGmail}
+        variant="outline"
+        size="sm"
+        disabled={!!busy}
+        className="text-red-500 border-red-200 hover:bg-red-50"
+      >
+        {busy === "gmail" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+        Gmail
+      </Button>
+      <Button onClick={handleCopyLink} variant="outline" size="sm" disabled={!!busy}>
+        {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+        {copied ? "Copied" : "Copy Link"}
+      </Button>
+    </div>
+  );
+}

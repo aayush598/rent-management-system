@@ -11,20 +11,107 @@ export async function createTenant(formData: FormData) {
   if (!userId) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
+  const email = formData.get("email") as string | null;
+  const phone = formData.get("phone") as string | null;
   const familySize = parseInt(formData.get("familySize") as string);
   const baseRent = formData.get("baseRent") as string;
   const waterCharge = formData.get("waterCharge") as string;
+  let customCharges: { name: string; amount: number }[] = [];
+
+  try {
+    const raw = formData.get("customCharges") as string;
+    if (raw) customCharges = JSON.parse(raw);
+  } catch {}
 
   await db.insert(tenants).values({
     userId,
     name,
+    email: email || null,
+    phone: phone || null,
     familySize,
     baseRent,
     waterCharge,
+    customCharges,
+    isLandlordConfirmed: true,
+    isTenantConfirmed: false,
   });
 
   revalidatePath("/dashboard/tenants");
   revalidatePath("/dashboard");
+}
+
+export async function updateTenant(tenantId: number, formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+  if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
+
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string | null;
+  const phone = formData.get("phone") as string | null;
+  const familySize = parseInt(formData.get("familySize") as string);
+  const baseRent = formData.get("baseRent") as string;
+  const waterCharge = formData.get("waterCharge") as string;
+
+  await db
+    .update(tenants)
+    .set({
+      name,
+      email: email || null,
+      phone: phone || null,
+      familySize,
+      baseRent,
+      waterCharge,
+    })
+    .where(eq(tenants.id, tenantId));
+
+  revalidatePath(`/dashboard/tenants/${tenantId}`);
+  revalidatePath("/dashboard/tenants");
+  revalidatePath("/dashboard");
+}
+
+export async function updateCustomCharges(tenantId: number, formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+  if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
+
+  let customCharges: { name: string; amount: number }[] = [];
+  try {
+    const raw = formData.get("customCharges") as string;
+    if (raw) customCharges = JSON.parse(raw);
+  } catch {}
+
+  await db.update(tenants).set({ customCharges }).where(eq(tenants.id, tenantId));
+
+  revalidatePath(`/dashboard/tenants/${tenantId}`);
+}
+
+export async function confirmTenantLink(tenantId: number) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+  if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
+  if (!tenant.tenantUserId) throw new Error("Tenant has not linked their account yet");
+
+  await db.update(tenants).set({ isLandlordConfirmed: true }).where(eq(tenants.id, tenantId));
+
+  revalidatePath(`/dashboard/tenants/${tenantId}`);
+}
+
+export async function rejectTenantLink(tenantId: number) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+  if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
+
+  await db.update(tenants).set({ tenantUserId: null, isTenantConfirmed: false }).where(eq(tenants.id, tenantId));
+
+  revalidatePath(`/dashboard/tenants/${tenantId}`);
 }
 
 export async function generateReceipt(formData: FormData) {
@@ -35,7 +122,6 @@ export async function generateReceipt(formData: FormData) {
   const dateStart = formData.get("dateStart") as string;
   const dateEnd = formData.get("dateEnd") as string;
 
-  // Check for overlapping bills for this tenant
   const existingBills = await db
     .select()
     .from(bills)
@@ -57,12 +143,20 @@ export async function generateReceipt(formData: FormData) {
   const electricityCurrUnit = includeElectricity ? parseInt(formData.get("electricityCurrUnit") as string) : 0;
   const electricityAmount = includeElectricity ? (electricityCurrUnit - electricityPrevUnit) * 10 : 0;
 
-  const totalAmount = rentAmount + waterAmount + electricityAmount + oldPendingAmount;
+  let customCharges: { name: string; amount: number; paid: number }[] = [];
+  try {
+    const raw = formData.get("customCharges") as string;
+    if (raw) customCharges = JSON.parse(raw);
+  } catch {}
+
+  const customChargesSum = customCharges.reduce((s, c) => s + c.amount, 0);
+  const totalAmount = rentAmount + waterAmount + electricityAmount + oldPendingAmount + customChargesSum;
 
   const rentPaid = parseFloat((formData.get("rentPaid") as string) || "0");
   const waterPaid = parseFloat((formData.get("waterPaid") as string) || "0");
   const electricityPaid = parseFloat((formData.get("electricityPaid") as string) || "0");
-  const totalPaid = rentPaid + waterPaid + electricityPaid;
+  const customChargesPaid = customCharges.reduce((s, c) => s + c.paid, 0);
+  const totalPaid = rentPaid + waterPaid + electricityPaid + customChargesPaid;
 
   const isPaid = totalPaid >= totalAmount;
 
@@ -79,6 +173,7 @@ export async function generateReceipt(formData: FormData) {
       electricityPrevUnit,
       electricityCurrUnit,
       electricityAmount: electricityAmount.toFixed(2),
+      customCharges: customCharges.length > 0 ? customCharges : [],
       totalAmount: totalAmount.toFixed(2),
       rentPaid: rentPaid.toFixed(2),
       waterPaid: waterPaid.toFixed(2),
@@ -88,7 +183,6 @@ export async function generateReceipt(formData: FormData) {
     })
     .returning({ id: bills.id });
 
-  // Optional: create a generic payment record too
   if (totalPaid > 0) {
     await db.insert(payments).values({
       tenantId,
@@ -106,7 +200,6 @@ export async function deleteBill(billId: number, tenantId: number) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  // Verify ownership
   const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
   if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
 
@@ -114,7 +207,7 @@ export async function deleteBill(billId: number, tenantId: number) {
   await db.delete(bills).where(eq(bills.id, billId));
 
   revalidatePath(`/dashboard/tenants/${tenantId}`);
-  revalidatePath(`/dashboard/bills`);
+  revalidatePath("/dashboard/bills");
 }
 
 export async function deletePayment(paymentId: number, tenantId: number) {
@@ -139,7 +232,6 @@ export async function updateBill(billId: number, formData: FormData) {
   const dateStart = formData.get("dateStart") as string;
   const dateEnd = formData.get("dateEnd") as string;
 
-  // Check for overlapping bills for this tenant (excluding current bill)
   const existingBills = await db
     .select()
     .from(bills)
@@ -167,12 +259,20 @@ export async function updateBill(billId: number, formData: FormData) {
   const electricityCurrUnit = includeElectricity ? parseInt(formData.get("electricityCurrUnit") as string) : 0;
   const electricityAmount = includeElectricity ? (electricityCurrUnit - electricityPrevUnit) * 10 : 0;
 
-  const totalAmount = rentAmount + waterAmount + electricityAmount + oldPendingAmount;
+  let customCharges: { name: string; amount: number; paid: number }[] = [];
+  try {
+    const raw = formData.get("customCharges") as string;
+    if (raw) customCharges = JSON.parse(raw);
+  } catch {}
+
+  const customChargesSum = customCharges.reduce((s, c) => s + c.amount, 0);
+  const totalAmount = rentAmount + waterAmount + electricityAmount + oldPendingAmount + customChargesSum;
 
   const rentPaid = parseFloat((formData.get("rentPaid") as string) || "0");
   const waterPaid = parseFloat((formData.get("waterPaid") as string) || "0");
   const electricityPaid = parseFloat((formData.get("electricityPaid") as string) || "0");
-  const totalPaid = rentPaid + waterPaid + electricityPaid;
+  const customChargesPaid = customCharges.reduce((s, c) => s + c.paid, 0);
+  const totalPaid = rentPaid + waterPaid + electricityPaid + customChargesPaid;
 
   const isPaid = totalPaid >= totalAmount;
 
@@ -188,6 +288,7 @@ export async function updateBill(billId: number, formData: FormData) {
       electricityPrevUnit,
       electricityCurrUnit,
       electricityAmount: electricityAmount.toFixed(2),
+      customCharges: customCharges.length > 0 ? customCharges : [],
       totalAmount: totalAmount.toFixed(2),
       rentPaid: rentPaid.toFixed(2),
       waterPaid: waterPaid.toFixed(2),
@@ -197,7 +298,6 @@ export async function updateBill(billId: number, formData: FormData) {
     })
     .where(eq(bills.id, billId));
 
-  // Sync the associated payment record if it exists
   if (totalPaid > 0) {
     const [existingPayment] = await db.select().from(payments).where(eq(payments.billId, billId));
     if (existingPayment) {
@@ -221,7 +321,7 @@ export async function updateBill(billId: number, formData: FormData) {
   }
 
   revalidatePath(`/dashboard/tenants/${tenantId}`);
-  revalidatePath(`/dashboard/bills`);
+  revalidatePath("/dashboard/bills");
 }
 
 export async function updatePayment(paymentId: number, formData: FormData) {
@@ -243,7 +343,6 @@ export async function updatePayment(paymentId: number, formData: FormData) {
     })
     .where(eq(payments.id, paymentId));
 
-  // Sync bill totals when payment is linked to a bill
   const [payment] = await db.select().from(payments).where(eq(payments.id, paymentId));
   if (payment?.billId) {
     const allPayments = await db.select().from(payments).where(eq(payments.billId, payment.billId));
@@ -286,7 +385,7 @@ export async function linkTenantAccount(formData: FormData) {
   if (!tenant) throw new Error("Tenant not found");
   if (tenant.tenantUserId) throw new Error("Tenant is already linked to another user");
 
-  await db.update(tenants).set({ tenantUserId: userId }).where(eq(tenants.id, tenantId));
+  await db.update(tenants).set({ tenantUserId: userId, isTenantConfirmed: true }).where(eq(tenants.id, tenantId));
 
   revalidatePath(`/dashboard/tenants/${tenantId}`);
   revalidatePath("/my");
@@ -297,23 +396,39 @@ export async function linkTenantByName(formData: FormData) {
   if (!userId) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
-  if (!name) throw new Error("Please enter your name");
+  const email = formData.get("email") as string;
+  const phone = formData.get("phone") as string | null;
 
-  const matches = await db
+  if (!name) throw new Error("Please enter your name");
+  if (!email) throw new Error("Please enter your email address");
+
+  let matches = await db
     .select()
     .from(tenants)
-    .where(and(isNull(tenants.tenantUserId), eq(tenants.name, name)))
-    .limit(10);
+    .where(and(isNull(tenants.tenantUserId), eq(tenants.name, name), eq(tenants.email, email)))
+    .limit(5);
 
   if (matches.length === 0) {
-    throw new Error("No unlinked tenant found with that name. Please contact your landlord.");
+    if (phone) {
+      matches = await db
+        .select()
+        .from(tenants)
+        .where(and(isNull(tenants.tenantUserId), eq(tenants.name, name), eq(tenants.phone, phone)))
+        .limit(5);
+    }
+  }
+
+  if (matches.length === 0) {
+    throw new Error(
+      "No unlinked tenant found matching your details. Please contact your landlord to verify your email/phone is correctly registered.",
+    );
   }
 
   if (matches.length > 1) {
-    throw new Error("Multiple tenants found with that name. Please contact your landlord for a direct link.");
+    throw new Error("Multiple matching records found. Please contact your landlord for a direct link.");
   }
 
-  await db.update(tenants).set({ tenantUserId: userId }).where(eq(tenants.id, matches[0].id));
+  await db.update(tenants).set({ tenantUserId: userId, isTenantConfirmed: true }).where(eq(tenants.id, matches[0].id));
 
   revalidatePath("/onboarding/link-tenant");
   revalidatePath("/my");
@@ -326,7 +441,7 @@ export async function unlinkTenantAccount(tenantId: number) {
   const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
   if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
 
-  await db.update(tenants).set({ tenantUserId: null }).where(eq(tenants.id, tenantId));
+  await db.update(tenants).set({ tenantUserId: null, isTenantConfirmed: false }).where(eq(tenants.id, tenantId));
 
   revalidatePath(`/dashboard/tenants/${tenantId}`);
 }

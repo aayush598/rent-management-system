@@ -24,7 +24,7 @@ export default async function LandingPage() {
             </>
           ) : (
             <>
-              <SignInButton mode="modal">
+              <SignInButton mode="modal" forceRedirectUrl="/onboarding/role">
                 <button className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
                   Log In
                 </button>

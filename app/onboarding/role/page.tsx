@@ -1,17 +1,29 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Building2, User } from "lucide-react";
 import { setUserRole } from "@/app/actions";
+import { useEffect } from "react";
 
 export default function OnboardingRolePage() {
-  const { user, isLoaded } = useUser();
+  const { isLoaded, user } = useUser();
+  const clerk = useClerk();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      const role = user.publicMetadata.role as string | undefined;
+      if (role === "landlord") router.replace("/dashboard");
+      else if (role === "tenant") router.replace("/onboarding/link-tenant");
+    }
+  }, [isLoaded, user, router]);
 
   async function handleRoleSelect(role: "landlord" | "tenant") {
     try {
       await setUserRole(role);
+      await user?.reload();
+      await clerk.session?.reload();
       router.push(role === "landlord" ? "/dashboard" : "/onboarding/link-tenant");
     } catch {
       // handled by the action

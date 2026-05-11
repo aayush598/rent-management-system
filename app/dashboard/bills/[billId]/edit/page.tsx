@@ -3,7 +3,7 @@ import { tenants, bills } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
-import { EditReceiptForm } from "./EditReceiptForm";
+import { EditReceiptForm } from "@/components/EditReceiptForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -36,7 +36,24 @@ export default async function EditBillPage({ params }: { params: Promise<{ billI
         </div>
       </div>
 
-      <EditReceiptForm tenant={tenant} bill={bill} />
+      <EditReceiptForm
+        tenant={tenant}
+        bill={{
+          id: bill.id,
+          dateStart: bill.dateStart ?? "",
+          dateEnd: bill.dateEnd ?? "",
+          rentAmount: bill.rentAmount,
+          waterAmount: bill.waterAmount,
+          electricityPrevUnit: bill.electricityPrevUnit,
+          electricityCurrUnit: bill.electricityCurrUnit,
+          electricityAmount: bill.electricityAmount,
+          oldPendingAmount: bill.oldPendingAmount,
+          rentPaid: bill.rentPaid,
+          waterPaid: bill.waterPaid,
+          electricityPaid: bill.electricityPaid,
+          customCharges: (bill.customCharges || []) as { name: string; amount: number; paid: number }[],
+        }}
+      />
     </div>
   );
 }

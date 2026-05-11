@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import { tenants, bills, payments } from "@/db/schema";
+import { tenants, bills } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { Users, FileText, IndianRupee, TrendingUp, CheckCircle, Clock } from "lucide-react";
+import { Users, IndianRupee, TrendingUp, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { DashboardCharts } from "./Charts";
 
@@ -19,7 +19,6 @@ export default async function DashboardPage() {
       : [];
 
   const totalTenants = userTenants.length;
-  const totalBills = allBills.length;
   const totalRevenue = allBills.reduce((sum, b) => sum + parseFloat(b.totalAmount as string), 0);
   const totalCollected = allBills.reduce((sum, b) => sum + parseFloat(b.totalPaid as string), 0);
   const pendingBills = allBills.filter((b) => !b.isPaid).length;
@@ -77,7 +76,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <DashboardCharts bills={allBills} tenantCount={totalTenants} />
+      <DashboardCharts bills={allBills} _tenantCount={totalTenants} />
 
       {/* Tenants List */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
