@@ -101,6 +101,7 @@ export function EditReceiptForm({ tenant, bill }: { tenant: any; bill: any }) {
               required
               type="date"
               value={dateEnd}
+              min={dateStart || undefined}
               onChange={(e) => setDateEnd(e.target.value)}
               className="w-full px-3 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />

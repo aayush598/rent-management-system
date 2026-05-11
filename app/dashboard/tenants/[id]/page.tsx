@@ -2,11 +2,24 @@ import { db } from "@/db";
 import { tenants, bills, payments } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { ArrowLeft, Plus, FileText, Zap, Droplets, Home, IndianRupee, Edit } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  FileText,
+  Zap,
+  Droplets,
+  Home,
+  IndianRupee,
+  Edit,
+  CheckCircle,
+  Link as LinkIcon,
+  Unlink,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GenerateReceiptForm } from "./GenerateReceiptForm";
 import { DeleteBillButton, DeletePaymentButton, EditPaymentButton } from "./ActionButtons";
+import { unlinkTenantAccount } from "@/app/actions";
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
@@ -160,6 +173,41 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             lastEndDate={lastEndDate}
             lastPending={lastPending}
           />
+
+          {/* Tenant Portal Access */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Tenant Portal</h3>
+            {tenant.tenantUserId ? (
+              <div>
+                <div className="flex items-center gap-2 text-emerald-600 mb-3">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Tenant account linked</span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  Your tenant can view their bills and payment history online.
+                </p>
+                <form action={unlinkTenantAccount.bind(null, tenant.id)}>
+                  <button
+                    type="submit"
+                    className="w-full px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Unlink className="w-4 h-4" /> Remove Access
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-2 text-slate-400 mb-3">
+                  <LinkIcon className="w-5 h-5" />
+                  <span className="font-medium">Not linked</span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  Ask your tenant to sign up at RentMaster and enter their name as &quot;{tenant.name}&quot; to link
+                  their account.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

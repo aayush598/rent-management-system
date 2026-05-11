@@ -131,6 +131,7 @@ export function GenerateReceiptForm({
               required
               type="date"
               value={dateStart}
+              min={lastEndDate || undefined}
               onChange={(e) => setDateStart(e.target.value)}
               className="w-full px-3 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -141,6 +142,7 @@ export function GenerateReceiptForm({
               required
               type="date"
               value={dateEnd}
+              min={dateStart || undefined}
               onChange={(e) => setDateEnd(e.target.value)}
               className="w-full px-3 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />

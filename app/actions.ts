@@ -2,9 +2,9 @@
 
 import { db } from "@/db";
 import { tenants, bills, payments } from "@/db/schema";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { eq, and, gte, lte, or } from "drizzle-orm";
+import { eq, and, gte, lte, ne, isNull } from "drizzle-orm";
 
 export async function createTenant(formData: FormData) {
   const { userId } = await auth();
@@ -39,15 +39,7 @@ export async function generateReceipt(formData: FormData) {
   const existingBills = await db
     .select()
     .from(bills)
-    .where(
-      and(
-        eq(bills.tenantId, tenantId),
-        or(
-          and(gte(bills.dateStart, dateStart), lte(bills.dateStart, dateEnd)),
-          and(gte(bills.dateEnd, dateStart), lte(bills.dateEnd, dateEnd)),
-        ),
-      ),
-    );
+    .where(and(eq(bills.tenantId, tenantId), and(lte(bills.dateStart, dateEnd), gte(bills.dateEnd, dateStart))));
 
   if (existingBills.length > 0) {
     throw new Error("A bill already exists for this period or overlaps with it.");
@@ -147,6 +139,22 @@ export async function updateBill(billId: number, formData: FormData) {
   const dateStart = formData.get("dateStart") as string;
   const dateEnd = formData.get("dateEnd") as string;
 
+  // Check for overlapping bills for this tenant (excluding current bill)
+  const existingBills = await db
+    .select()
+    .from(bills)
+    .where(
+      and(
+        eq(bills.tenantId, tenantId),
+        ne(bills.id, billId),
+        and(lte(bills.dateStart, dateEnd), gte(bills.dateEnd, dateStart)),
+      ),
+    );
+
+  if (existingBills.length > 0) {
+    throw new Error("A bill already exists for this period or overlaps with it.");
+  }
+
   const includeRent = formData.get("includeRent") === "true";
   const includeWater = formData.get("includeWater") === "true";
   const includeElectricity = formData.get("includeElectricity") === "true";
@@ -234,6 +242,91 @@ export async function updatePayment(paymentId: number, formData: FormData) {
       description,
     })
     .where(eq(payments.id, paymentId));
+
+  // Sync bill totals when payment is linked to a bill
+  const [payment] = await db.select().from(payments).where(eq(payments.id, paymentId));
+  if (payment?.billId) {
+    const allPayments = await db.select().from(payments).where(eq(payments.billId, payment.billId));
+    const totalPaid = allPayments.reduce((sum, p) => sum + parseFloat(p.amount as string), 0);
+
+    const [bill] = await db.select().from(bills).where(eq(bills.id, payment.billId));
+    if (bill) {
+      const isPaid = totalPaid >= parseFloat(bill.totalAmount as string);
+      await db
+        .update(bills)
+        .set({
+          totalPaid: totalPaid.toFixed(2),
+          isPaid,
+        })
+        .where(eq(bills.id, payment.billId));
+    }
+  }
+
+  revalidatePath(`/dashboard/tenants/${tenantId}`);
+}
+
+export async function setUserRole(role: "landlord" | "tenant") {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const client = await clerkClient();
+  await client.users.updateUser(userId, {
+    publicMetadata: { role },
+  });
+
+  revalidatePath("/onboarding/role");
+}
+
+export async function linkTenantAccount(formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const tenantId = parseInt(formData.get("tenantId") as string);
+  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+  if (!tenant) throw new Error("Tenant not found");
+  if (tenant.tenantUserId) throw new Error("Tenant is already linked to another user");
+
+  await db.update(tenants).set({ tenantUserId: userId }).where(eq(tenants.id, tenantId));
+
+  revalidatePath(`/dashboard/tenants/${tenantId}`);
+  revalidatePath("/my");
+}
+
+export async function linkTenantByName(formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const name = formData.get("name") as string;
+  if (!name) throw new Error("Please enter your name");
+
+  const matches = await db
+    .select()
+    .from(tenants)
+    .where(and(isNull(tenants.tenantUserId), eq(tenants.name, name)))
+    .limit(10);
+
+  if (matches.length === 0) {
+    throw new Error("No unlinked tenant found with that name. Please contact your landlord.");
+  }
+
+  if (matches.length > 1) {
+    throw new Error("Multiple tenants found with that name. Please contact your landlord for a direct link.");
+  }
+
+  await db.update(tenants).set({ tenantUserId: userId }).where(eq(tenants.id, matches[0].id));
+
+  revalidatePath("/onboarding/link-tenant");
+  revalidatePath("/my");
+}
+
+export async function unlinkTenantAccount(tenantId: number) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+  if (!tenant || tenant.userId !== userId) throw new Error("Unauthorized");
+
+  await db.update(tenants).set({ tenantUserId: null }).where(eq(tenants.id, tenantId));
 
   revalidatePath(`/dashboard/tenants/${tenantId}`);
 }

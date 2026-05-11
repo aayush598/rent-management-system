@@ -3,6 +3,7 @@ import { pgTable, serial, text, integer, timestamp, boolean, decimal } from "dri
 export const tenants = pgTable("tenants", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull(), // Clerk User ID (Landlord)
+  tenantUserId: text("tenant_user_id"), // Clerk User ID (Tenant) for RBAC
   name: text("name").notNull(),
   familySize: integer("family_size").notNull(),
   baseRent: decimal("base_rent", { precision: 10, scale: 2 }).notNull().default("0"),
