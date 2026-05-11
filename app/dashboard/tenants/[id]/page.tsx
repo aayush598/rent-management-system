@@ -98,7 +98,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                           <div className="flex items-center ml-2">
                             <Link
                               href={`/dashboard/bills/${bill.id}/edit`}
-                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                               title="Edit Bill"
                             >
                               <Edit className="w-4 h-4" />
@@ -108,7 +108,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                         </div>
                         <div className="mt-2 space-y-1 text-sm text-slate-600">
                           <p className="flex items-center gap-2">
-                            <Home className="w-4 h-4 text-indigo-500" /> Rent: ₹{bill.rentAmount}
+                            <Home className="w-4 h-4 text-amber-500" /> Rent: ₹{bill.rentAmount}
                           </p>
                           <p className="flex items-center gap-2">
                             <Droplets className="w-4 h-4 text-emerald-500" /> Water: ₹{bill.waterAmount}
@@ -149,7 +149,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                         <Link
                           href={`/receipt/${bill.id}`}
                           target="_blank"
-                          className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center justify-end gap-1 mt-4"
+                          className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center justify-end gap-1 mt-4"
                         >
                           <FileText className="w-4 h-4" /> View Receipt
                         </Link>

@@ -8,7 +8,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col sticky top-0 h-screen">
         <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <Link href="/my" className="flex items-center gap-2 font-bold text-xl text-indigo-600">
+          <Link href="/my" className="flex items-center gap-2 font-bold text-xl text-amber-500">
             <Home className="w-6 h-6" />
             <span>RentMaster</span>
           </Link>
@@ -16,7 +16,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 p-4 space-y-2">
           <Link
             href="/my"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-indigo-600 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-amber-500 transition-colors"
           >
             <FileText className="w-5 h-5" />
             <span className="font-medium">My Bills</span>
@@ -34,7 +34,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="h-16 bg-white border-b border-slate-200 md:hidden flex items-center justify-between px-4">
-          <Link href="/my" className="flex items-center gap-2 font-bold text-lg text-indigo-600">
+          <Link href="/my" className="flex items-center gap-2 font-bold text-lg text-amber-500">
             <Home className="w-5 h-5" />
             <span>RentMaster</span>
           </Link>

@@ -161,7 +161,7 @@ export function GenerateReceiptForm({ tenant, nextPrevUnit, lastEndDate, lastPen
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
               <FileText className="w-5 h-5" />
             </div>
             <CardTitle>Generate Receipt</CardTitle>
@@ -207,7 +207,7 @@ export function GenerateReceiptForm({ tenant, nextPrevUnit, lastEndDate, lastPen
                   type="checkbox"
                   defaultChecked
                   {...register("includeRent")}
-                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  className="rounded border-slate-300 text-amber-500 focus:ring-amber-500"
                 />
                 Rent (₹{tenant.baseRent})
               </label>
@@ -216,7 +216,7 @@ export function GenerateReceiptForm({ tenant, nextPrevUnit, lastEndDate, lastPen
                   type="checkbox"
                   defaultChecked
                   {...register("includeWater")}
-                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  className="rounded border-slate-300 text-amber-500 focus:ring-amber-500"
                 />
                 Water (₹{tenant.waterCharge})
               </label>
@@ -226,7 +226,7 @@ export function GenerateReceiptForm({ tenant, nextPrevUnit, lastEndDate, lastPen
                     type="checkbox"
                     defaultChecked
                     {...register("includeElectricity")}
-                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="rounded border-slate-300 text-amber-500 focus:ring-amber-500"
                   />
                   Electricity (₹10/unit)
                 </label>
@@ -302,7 +302,7 @@ export function GenerateReceiptForm({ tenant, nextPrevUnit, lastEndDate, lastPen
               <p className="text-xs text-slate-500 mt-1">Carry forward unpaid amount from previous bills</p>
             </div>
 
-            <div className="flex justify-between items-center p-4 bg-indigo-50 text-indigo-900 rounded-xl font-bold">
+            <div className="flex justify-between items-center p-4 bg-amber-50 text-amber-800 rounded-xl font-bold">
               <span className="flex items-center gap-2">
                 <Calculator className="w-5 h-5" /> Total Due:
               </span>
@@ -315,7 +315,7 @@ export function GenerateReceiptForm({ tenant, nextPrevUnit, lastEndDate, lastPen
                 <button
                   type="button"
                   onClick={autoFillFullPayment}
-                  className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 transition-colors"
+                  className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded hover:bg-amber-100 transition-colors"
                 >
                   Autofill Full Amount
                 </button>

@@ -57,7 +57,7 @@ export function AddTenantForm() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
             <Plus className="w-5 h-5" />
           </div>
           <CardTitle>Add New Tenant</CardTitle>

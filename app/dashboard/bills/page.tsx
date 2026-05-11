@@ -35,7 +35,7 @@ export default async function BillsPage() {
             <input
               type="text"
               placeholder="Search bills..."
-              className="w-full pl-10 pr-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2 text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
         </div>
@@ -74,13 +74,13 @@ export default async function BillsPage() {
                         <Link
                           href={`/receipt/${bill.id}`}
                           target="_blank"
-                          className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                          className="inline-flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors"
                         >
                           <FileText className="w-4 h-4" /> Receipt
                         </Link>
                         <Link
                           href={`/dashboard/bills/${bill.id}/edit`}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                           title="Edit Bill"
                         >
                           <svg

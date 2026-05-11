@@ -83,7 +83,7 @@ export default async function MyPage() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+          <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
             <IndianRupee className="w-6 h-6" />
           </div>
           <div>
@@ -123,7 +123,7 @@ export default async function MyPage() {
                     {tenant && <p className="text-sm text-slate-500 mt-1">Property: {tenant.name}</p>}
                     <div className="mt-3 space-y-1 text-sm text-slate-600">
                       <p className="flex items-center gap-2">
-                        <Home className="w-4 h-4 text-indigo-500" /> Rent: ₹{bill.rentAmount}
+                        <Home className="w-4 h-4 text-amber-500" /> Rent: ₹{bill.rentAmount}
                       </p>
                       <p className="flex items-center gap-2">
                         <Droplets className="w-4 h-4 text-emerald-500" /> Water: ₹{bill.waterAmount}
@@ -170,7 +170,7 @@ export default async function MyPage() {
                     <a
                       href={`/receipt/${bill.id}`}
                       target="_blank"
-                      className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1 mt-4"
+                      className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center gap-1 mt-4"
                     >
                       <FileText className="w-4 h-4" /> View Receipt
                     </a>

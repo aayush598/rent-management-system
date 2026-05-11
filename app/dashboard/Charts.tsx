@@ -53,9 +53,9 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
 }
 
 const COLORS = {
-  indigo: "#6366f1",
-  emerald: "#10b981",
   amber: "#f59e0b",
+  emerald: "#10b981",
+  indigo: "#6366f1",
   red: "#ef4444",
   purple: "#8b5cf6",
 };
@@ -97,7 +97,7 @@ export function DashboardCharts({ bills }: { bills: any[]; _tenantCount?: number
       return sum + (Array.isArray(cc) ? cc.reduce((s: number, c: any) => s + (Number(c.amount) || 0), 0) : 0);
     }, 0);
     const result = [
-      { name: "Rent", amount: rent, color: COLORS.indigo },
+      { name: "Rent", amount: rent, color: COLORS.amber },
       { name: "Water", amount: water, color: COLORS.emerald },
       { name: "Electricity", amount: electricity, color: COLORS.amber },
     ];
@@ -139,7 +139,7 @@ export function DashboardCharts({ bills }: { bills: any[]; _tenantCount?: number
                   tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="totalAmount" name="Total Amount" fill={COLORS.indigo} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="totalAmount" name="Total Amount" fill={COLORS.amber} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="totalPaid" name="Total Paid" fill={COLORS.emerald} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -215,7 +215,7 @@ export function DashboardCharts({ bills }: { bills: any[]; _tenantCount?: number
                   return (
                     <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-lg text-sm">
                       <p className="font-semibold text-slate-900 mb-1">{label}</p>
-                      <p className="font-medium text-indigo-600">Collection: {payload[0].value}%</p>
+                      <p className="font-medium text-amber-600">Collection: {payload[0].value}%</p>
                     </div>
                   );
                 }}
@@ -234,25 +234,25 @@ export function DashboardCharts({ bills }: { bills: any[]; _tenantCount?: number
               />
               <defs>
                 <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.indigo} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.indigo} stopOpacity={0} />
+                  <stop offset="5%" stopColor={COLORS.amber} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={COLORS.amber} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <Area
                 type="monotone"
                 dataKey="rate"
-                stroke={COLORS.indigo}
+                stroke={COLORS.amber}
                 strokeWidth={2}
                 fill="url(#colorRate)"
-                dot={{ fill: COLORS.indigo, r: 4 }}
-                activeDot={{ r: 6, fill: COLORS.indigo }}
+                dot={{ fill: COLORS.amber, r: 4 }}
+                activeDot={{ r: 6, fill: COLORS.amber }}
               />
               <Line
                 type="monotone"
                 dataKey="rate"
-                stroke={COLORS.indigo}
+                stroke={COLORS.amber}
                 strokeWidth={2}
-                dot={{ fill: COLORS.indigo, r: 4 }}
+                dot={{ fill: COLORS.amber, r: 4 }}
               />
             </AreaChart>
           </ResponsiveContainer>

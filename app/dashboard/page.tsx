@@ -29,7 +29,7 @@ export default async function DashboardPage() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
             <Users className="w-5 h-5" />
           </div>
           <div>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-200 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-900">Your Tenants</h2>
-          <Link href="/dashboard/tenants" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+          <Link href="/dashboard/tenants" className="text-sm font-medium text-amber-600 hover:text-amber-700">
             View All
           </Link>
         </div>

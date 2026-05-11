@@ -38,12 +38,12 @@ export default async function TenantsPage() {
                 <Link
                   key={tenant.id}
                   href={`/dashboard/tenants/${tenant.id}`}
-                  className="block bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group"
+                  className="block bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-amber-300 hover:shadow-md transition-all group"
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        <h2 className="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
                           {tenant.name}
                         </h2>
                         {isFullyLinked ? (

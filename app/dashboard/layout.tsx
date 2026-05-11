@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-slate-50 flex">
       <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col sticky top-0 h-screen">
         <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-indigo-600">
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-amber-500">
             <Home className="w-6 h-6" />
             <span>RentMaster</span>
           </Link>
@@ -56,8 +56,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative",
                   isActive
-                    ? "text-indigo-600 bg-indigo-50 font-semibold"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-indigo-600",
+                    ? "text-amber-500 bg-amber-50 font-semibold"
+                    : "text-slate-700 hover:bg-amber-50 hover:text-amber-500",
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
@@ -66,7 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute inset-0 bg-indigo-50 rounded-lg -z-10"
+                    className="absolute inset-0 bg-amber-50 rounded-lg -z-10"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <header className="h-16 bg-white border-b border-slate-200 md:hidden flex items-center justify-between px-4">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg text-indigo-600">
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg text-amber-500">
             <Home className="w-5 h-5" />
             <span>RentMaster</span>
           </Link>

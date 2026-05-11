@@ -57,7 +57,7 @@ export function EditPaymentDialog({ payment, tenantId }: EditPaymentDialogProps)
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+          className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
           title="Edit Payment"
           aria-label="Edit payment"
         >

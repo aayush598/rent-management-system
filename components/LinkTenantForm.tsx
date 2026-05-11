@@ -41,7 +41,7 @@ export function LinkTenantForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-orange-50 p-4">
       <div className="w-full max-w-md">
         <button
           onClick={() => router.push("/onboarding/role")}
@@ -51,7 +51,7 @@ export function LinkTenantForm() {
         </button>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-          <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mx-auto mb-4">
+          <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mx-auto mb-4">
             <Search className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 text-center mb-2">Link Your Account</h1>

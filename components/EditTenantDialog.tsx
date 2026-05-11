@@ -67,7 +67,7 @@ export function EditTenantDialog({ tenant }: EditTenantDialogProps) {
     <Dialog>
       <DialogTrigger asChild>
         <button
-          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+          className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
           title="Edit Tenant"
         >
           <Edit className="w-4 h-4" />
